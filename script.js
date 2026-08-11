@@ -32,20 +32,27 @@ const filterChips = document.querySelectorAll('.filter-chip');
 
 taskDateInput.min = new Date().toISOString().split("T");
 
-// FUNZIONE PER CAMBIARE COLONNA O APRIRE IL FORM SU SMARTPHONE
 function switchMobileView(target) {
-    if (window.innerWidth > 1024) return; // Disattivato su PC
+    if (window.innerWidth > 1024) return; 
 
-    // Gestione colonne e form
-    document.querySelectorAll('.mobile-column, .mobile-panel').forEach(el => el.classList.remove('mobile-active'));
+    // Nasconde TUTTI i pannelli e le colonne mobile
+    document.querySelectorAll('.mobile-column, .mobile-panel').forEach(el => {
+        el.classList.remove('mobile-active');
+        el.style.display = 'none'; // Forza la scomparsa totale a livello CSS
+    });
     
+    // Mostra SOLO il pannello o la colonna bersaglio
     if (target === 'form') {
-        document.getElementById('panel-form').classList.add('mobile-active');
+        const targetFormPanel = document.getElementById('panel-form');
+        targetFormPanel.classList.add('mobile-active');
+        targetFormPanel.style.display = 'block';
     } else {
-        document.getElementById(`col-${target}`).classList.add('mobile-active');
+        const targetCol = document.getElementById(`col-${target}`);
+        targetCol.classList.add('mobile-active');
+        targetCol.style.display = 'block';
     }
 
-    // Gestione stato pulsanti della barra inferiore
+    // Aggiorna l'evidenziazione dell'icona nella barra inferiore
     document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
     const activeBtn = document.getElementById(`nav-${target}`);
     if (activeBtn) activeBtn.classList.add('active');
@@ -101,12 +108,19 @@ function calculatePriority(dueDateStr) {
 }
 
 function handleFormSubmit(e) {
-    e.preventDefault();
+    if (e) e.preventDefault(); // Blocca l'evento nativo se presente
+    
     const id = taskIdInput.value;
     const title = taskTitleInput.value.trim();
     const subjectColor = taskSubjectInput.value;
     const type = taskTypeInput.value;
     const date = taskDateInput.value;
+
+    // Controllo di sicurezza per evitare l'inserimento di compiti vuoti
+    if (!title || !date) {
+        alert("Per favore, inserisci un titolo e una data validi.");
+        return;
+    }
 
     if (id) {
         tasks = tasks.map(t => t.id === id ? { ...t, title, subjectColor, type, date } : t);
@@ -114,14 +128,13 @@ function handleFormSubmit(e) {
         tasks.push({ id: Date.now().toString(), title, subjectColor, type, date, status: 'todo' });
     }
 
+    // Salva nel localStorage ed esegue il re-rendering visivo delle card
     saveAndRender();
     clearForm();
     
-    // CORREZIONE BUG MOBILE: Forza il reindirizzamento corretto alla colonna "In Coda"
+    // GESTIONE REINDIRIZZAMENTO MOBILE: Cambia vista senza ricaricare la pagina
     if (window.innerWidth <= 1024) {
         switchMobileView('todo'); 
-    } else {
-        renderTasks();
     }
     
     checkImminentExams();
