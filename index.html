@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Studio Kanban OS - Mobile & Desktop</title>
+    <!-- Parametro v=6.0 per prevenire blocchi della vecchia cache del browser -->
+    <link rel="stylesheet" href="style.css?v=6.0">
+</head>
+<body>
+
+    <!-- Sfondi sfumati ad anello gestiti nativamente da codice CSS -->
+    <div class="neon-orb orb-purple"></div>
+    <div class="neon-orb orb-cyan"></div>
+
+    <div class="app-viewport">
+        <!-- Hub Principale per l'Avanzamento e la barra di Progresso -->
+        <div class="dashboard-progress-hub">
+            <div class="hub-meta">
+                <span class="hub-subtitle">PROGRESSO TOTALE</span>
+                <span id="global-progress-percent" class="hub-percentage">0%</span>
+            </div>
+            <div class="hub-track">
+                <div id="global-progress-bar" class="hub-fill"></div>
+            </div>
+        </div>
+
+        <!-- Barra di Navigazione Superiore -->
+        <header class="main-navbar">
+            <div class="brand">
+                <h1>Studio Kanban <span class="badge-neon">v6 PWA</span></h1>
+                <p>Interfaccia adattiva, touch-friendly e offline.</p>
+            </div>
+            <div class="navbar-actions">
+                <button id="enable-notifications" class="btn-action-glass">Notifiche</button>
+            </div>
+        </header>
+
+        <!-- Area Operativa Principale (Grid) -->
+        <main class="workspace-grid">
+            <!-- Pannello di Controllo Sinistro / Modale a comparsa su Mobile -->
+            <aside class="sidebar-controls mobile-panel" id="panel-form">
+                <!-- Form Creazione ed Aggiornamento Obiettivi -->
+                <div class="control-box form-card">
+                    <div class="panel-header-mobile">
+                        <h2 id="form-title">Iniezione Obiettivo</h2>
+                        <button class="btn-close-panel" onclick="switchMobileView('todo')">✕</button>
+                    </div>
+                    <form id="task-form">
+                        <input type="hidden" id="task-id">
+                        
+                        <div class="input-wrapper">
+                            <label for="task-title">Nome Task o Argomento</label>
+                            <input type="text" id="task-title" required placeholder="Es: Esercizi Fisica Nucleare">
+                        </div>
+                        
+                        <div class="input-wrapper">
+                            <label for="task-subject">Tag Settore Materia</label>
+                            <select id="task-subject">
+                                <option value="#a855f7">🟣 Lingue</option>
+                                <option value="#f43f5e">🔴 Matematica</option>
+                                <option value="#06b6d4">🔵 Informatica</option>
+                                <option value="#10b981">🟢 Storia</option>
+                                <option value="#f59e0b">🟡 Altro</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-wrapper">
+                            <label for="task-type">Tipologia</label>
+                            <select id="task-type">
+                                <option value="compito">📚 Studio / Esercizio</option>
+                                <option value="verifica">🚨 Verifica / Esame</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-wrapper">
+                            <label for="task-date">Scadenza Tassativa</label>
+                            <input type="date" id="task-date" required>
+                        </div>
+                        
+                        <button type="submit" id="submit-btn" class="btn-neon-trigger">Inietta nel Sistema</button>
+                        <button type="button" id="cancel-edit-btn" class="btn-neon-abort hidden">Scollega Modifica</button>
+                    </form>
+                </div>
+
+                <!-- Centro Filtri Avanzato -->
+                <div class="control-box filter-card">
+                    <div class="filter-header-action">
+                        <h2>Filtro Navigazione</h2>
+                        <button id="toggle-filter-panel" class="btn-subtle-toggle">Avanzate 🛠️</button>
+                    </div>
+                    
+                    <input type="text" id="search-input" class="search-neon" placeholder="Cerca per parola chiave...">
+                    
+                    <!-- Sotto-pannello ad attivazione ed animazione dinamica -->
+                    <div id="advanced-filter-panel" class="advanced-panel hidden-panel">
+                        <div class="filter-group-row">
+                            <label>Per Tipo:</label>
+                            <div class="filter-options">
+                                <button class="filter-chip active" data-filter-type="all">Tutti</button>
+                                <button class="filter-chip" data-filter-type="compito">Studio</button>
+                                <button class="filter-chip" data-filter-type="verifica">Verifiche</button>
+                            </div>
+                        </div>
+                        <div class="filter-group-row">
+                            <label>Per Priorità:</label>
+                            <div class="filter-options">
+                                <button class="filter-chip active" data-filter-prio="all">Tutte</button>
+                                <button class="filter-chip chip-high" data-filter-prio="Urgente">Urgente</button>
+                                <button class="filter-chip chip-low" data-filter-prio="Tranquillo">Tranquillo</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Lavagna Kanban / Mazzo Colonne Adattive -->
+            <section class="kanban-deck">
+                <!-- COLONNA: TODO -->
+                <div class="deck-column mobile-column" id="col-todo">
+                    <div class="column-top">
+                        <div class="title-flow">
+                            <span class="neon-glow-dot dot-todo"></span>
+                            <h2>In Coda</h2>
+                        </div>
+                        <span class="badge-counter" id="count-todo">0</span>
+                    </div>
+                    <div class="task-dropzone" id="list-todo"></div>
+                </div>
+
+                <!-- COLONNA: IN PROGRESS -->
+                <div class="deck-column mobile-column" id="col-progress">
+                    <div class="column-top">
+                        <div class="title-flow">
+                            <span class="neon-glow-dot dot-progress"></span>
+                            <h2>Focus Active</h2>
+                        </div>
+                        <span class="badge-counter" id="count-progress">0</span>
+                    </div>
+                    <div class="task-dropzone" id="list-progress"></div>
+                </div>
+
+                <!-- COLONNA: DONE -->
+                <div class="deck-column mobile-column" id="col-done">
+                    <div class="column-top">
+                        <div class="title-flow">
+                            <span class="neon-glow-dot dot-done"></span>
+                            <h2>Risolti</h2>
+                        </div>
+                        <span class="badge-counter" id="count-done">0</span>
+                    </div>
+                    <div class="task-dropzone" id="list-done"></div>
+                </div>
+            </section>
+        </main>
+
+        <!-- BARRA DI NAVIGAZIONE INFERIORE (Attiva ed esclusiva per dispositivi Mobile) -->
+        <nav class="mobile-nav-bar">
+            <button class="nav-item active" id="nav-todo" onclick="switchMobileView('todo')">
+                <span class="nav-icon">📋</span>
+                <span class="nav-label">In Coda</span>
+            </button>
+            <button class="nav-item" id="nav-progress" onclick="switchMobileView('progress')">
+                <span class="nav-icon">⚡</span>
+                <span class="nav-label">Focus</span>
+            </button>
+            <button class="nav-item" id="nav-done" onclick="switchMobileView('done')">
+                <span class="nav-icon">✅</span>
+                <span class="nav-label">Risolti</span>
+            </button>
+            <button class="nav-item nav-item-add" id="nav-form" onclick="switchMobileView('form')">
+                <span class="nav-icon">+</span>
+                <span class="nav-label">Nuovo</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Collegamento JS con parametro versione per forzare l'aggiornamento -->
+    <script src="script.js?v=6.0"></script>
+</body>
+</html>
