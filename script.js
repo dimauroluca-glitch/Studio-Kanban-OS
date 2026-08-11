@@ -116,7 +116,14 @@ function handleFormSubmit(e) {
 
     saveAndRender();
     clearForm();
-    switchMobileView('todo'); // Riporta alla prima colonna dopo aver aggiunto su mobile
+    
+    // CORREZIONE BUG MOBILE: Forza il reindirizzamento corretto alla colonna "In Coda"
+    if (window.innerWidth <= 1024) {
+        switchMobileView('todo'); 
+    } else {
+        renderTasks();
+    }
+    
     checkImminentExams();
 }
 
