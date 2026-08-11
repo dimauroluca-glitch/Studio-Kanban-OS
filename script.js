@@ -27,17 +27,19 @@ const filterChips = document.querySelectorAll('.filter-chip');
 // Blocca la selezione di date passate nel calendario nativo
 if (taskDateInput) taskDateInput.min = new Date().toISOString().split("T")[0];
 
-// FUNZIONE CORE MOBILE: scambia la colonna visibile o mostra il form di inserimento
 function switchMobileView(target) {
-    if (window.innerWidth > 1024) return; // Disattivato se l'utente usa un PC
+    if (window.innerWidth > 1024) return; // Disattivato su PC
 
-    // Nasconde tutti i moduli e le colonne per evitare sovrapposizioni verticali
+    // BLOCCO DI SICUREZZA NEON: Se l'utente clicca su un input, impedisce di saltare a "In Coda"
+    if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT')) {
+        return; 
+    }
+
     document.querySelectorAll('.mobile-column, .mobile-panel').forEach(el => {
         el.classList.remove('mobile-active');
-        el.style.display = 'none'; // Forza la scomparsa visiva a livello CSS
+        el.style.display = 'none';
     });
     
-    // Attiva ed estrae esclusivamente il pannello mirato dal menu inferiore
     if (target === 'form') {
         const formEl = document.getElementById('panel-form');
         formEl.classList.add('mobile-active');
@@ -48,12 +50,10 @@ function switchMobileView(target) {
         colEl.style.display = 'block';
     }
 
-    // Aggiorna lo stato visivo (colore azzurro) sull'icona della barra inferiore
     document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
     const activeBtn = document.getElementById(`nav-${target}`);
     if (activeBtn) activeBtn.classList.add('active');
     
-    // Riporta lo schermo in cima per migliorare l'ergonomia
     window.scrollTo({ top: 0, behavior: 'instant' });
 }
 /* ==========================================================================
@@ -107,12 +107,11 @@ filterChips.forEach(chip => {
    ========================================================================== */
 if (submitBtn) {
     submitBtn.addEventListener('click', (e) => {
-        e.preventDefault(); // Impedisce qualsiasi rinfresco della pagina
+        e.preventDefault(); 
         
         const title = taskTitleInput.value.trim();
         const date = taskDateInput.value;
 
-        // Controllo di sbarramento: impedisce l'inserimento di schede vuote
         if (!title || !date) {
             alert("Compila tutti i campi richiesti prima di procedere!");
             return;
@@ -123,18 +122,20 @@ if (submitBtn) {
         const type = taskTypeInput.value;
 
         if (id) {
-            // Modalità Modifica: sovrascrive i dati del compito esistente
             tasks = tasks.map(t => t.id === id ? { ...t, title, subjectColor, type, date } : t);
         } else {
-            // Modalità Nuovo: inserisce una nuova scheda in coda alla lista
             tasks.push({ id: Date.now().toString(), title, subjectColor, type, date, status: 'todo' });
         }
 
-        // Salva i dati nell'hard disk del browser e riaggiorna l'interfaccia
         localStorage.setItem('kanban-tasks', JSON.stringify(tasks));
+        
+        // Nasconde la tastiera dello smartphone per evitare falsi click di navigazione
+        if (document.activeElement) {
+            document.activeElement.blur();
+        }
+
         renderTasks();
         
-        // Pulisce completamente il modulo per il prossimo inserimento
         taskIdInput.value = "";
         taskTitleInput.value = "";
         taskDateInput.value = "";
@@ -142,7 +143,6 @@ if (submitBtn) {
         submitBtn.textContent = "Inietta nel Sistema";
         cancelEditBtn.classList.add('hidden');
 
-        // FIXED MOBILE: riporta l'utente alla lista compiti escludendo i freeze di navigazione
         if (window.innerWidth <= 1024) {
             switchMobileView('todo');
         }
