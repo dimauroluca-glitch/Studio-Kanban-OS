@@ -1,4 +1,4 @@
-const CACHE_NAME = 'studio-kanban-v9-mobile';
+const CACHE_NAME = 'studio-kanban-v10-offline';
 const ASSETS = [
   './',
   './index.html',
@@ -6,14 +6,37 @@ const ASSETS = [
   './script.js'
 ];
 
+// Installa e salva i file nella cache locale
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS);
+    })
+  );
+  self.skipWaiting();
 });
 
+// Cancella le vecchie cache e forza l'aggiornamento grafico
 self.addEventListener('activate', (e) => {
-  e.waitUntil(caches.keys().then((keys) => Promise.all(keys.map((key) => { if (key !== CACHE_NAME) return caches.delete(key); }))));
+  e.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+    })
+  );
+  self.clients.claim();
 });
 
+// Rende i file disponibili offline senza internet
 self.addEventListener('fetch', (e) => {
-  e.respondWith(caches.match(e.request).then((cachedResponse) => cachedResponse || fetch(e.request)));
+  e.respondWith(
+    caches.match(e.request).then((cachedResponse) => {
+      return cachedResponse || fetch(e.request);
+    })
+  );
 });
