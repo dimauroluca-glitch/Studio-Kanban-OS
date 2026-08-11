@@ -1,14 +1,17 @@
-/* ==========================================================================
-   1. DATABASE LOCALE, VARIABILI DI STATO E NAVIGAZIONE SMARTPHONE
-   ========================================================================== */
-// Carica i compiti dall'hard disk del browser o crea un elenco vuoto
-let tasks = JSON.parse(localStorage.getItem('kanban-tasks')) || [];
+// Attivazione immediata del motore offline nativo
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js?v=10.0')
+            .then(reg => console.log('Motore Offline Sincronizzato!', reg.scope))
+            .catch(err => console.log('Errore attivazione offline:', err));
+    });
+}
 
-// Parametri globali per la gestione dei filtri attivi
+// Database locale persistente del browser
+let tasks = JSON.parse(localStorage.getItem('kanban-tasks')) || [];
 let currentSearchQuery = "";
 let currentFilterType = "all";
 let currentFilterPrio = "all";
-
 // Mappatura dei campi di input e dei pulsanti del modulo
 const taskIdInput = document.getElementById('task-id');
 const taskTitleInput = document.getElementById('task-title');
