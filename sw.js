@@ -1,12 +1,12 @@
-const CACHE_NAME = 'studio-kanban-v10-offline';
+const CACHE_NAME = 'studio-kanban-v11-perfect-offline';
 const ASSETS = [
   './',
   './index.html',
-  './style.css',
-  './script.js'
+  './style.css?v=6.0', /* Ora corrisponde al richiamo esatto dell'HTML */
+  './script.js?v=6.0'  /* Ora corrisponde al richiamo esatto dell'HTML */
 ];
 
-// Installa e salva i file nella cache locale
+// Installa e memorizza i file nel disco fisso locale
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -16,7 +16,7 @@ self.addEventListener('install', (e) => {
   self.skipWaiting();
 });
 
-// Cancella le vecchie cache e forza l'aggiornamento grafico
+// Rimuove i vecchi residui grafici e attiva il nuovo motore
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) => {
@@ -32,7 +32,7 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
-// Rende i file disponibili offline senza internet
+// Intercetta la mancanza di rete e distribuisce la grafica salvata
 self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
