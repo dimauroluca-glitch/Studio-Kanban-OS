@@ -245,26 +245,29 @@ if (notificationBtn) {
     notificationBtn.addEventListener('click', () => { if ("Notification" in window) { Notification.requestPermission().then(p => { if (p === "granted") alert("Radar attivo!"); }); } });
 }
 
-// STRUTTURA RADAR SVEGLIE BACKGROUND: Invia sia i compiti che le verifiche ad app chiusa
+// RADAR ANTICIPATO: Prenota la sveglia alle 8:00 del giorno prima della scadenza
 function checkImminentExams() {
     if (!('serviceWorker' in navigator) || Notification.permission !== "granted") return;
 
     tasks.forEach(task => {
-        if (task.status !== 'done') { // Filtra solo i compiti attivi
+        if (task.status !== 'done') { // Solo compiti attivi
             const today = new Date(); today.setHours(0,0,0,0);
             const taskDate = new Date(task.date); taskDate.setHours(0,0,0,0);
             const diffDays = Math.ceil((taskDate - today) / (1000 * 60 * 60 * 24));
 
-            if (diffDays >= 0 && diffDays <= 2) {
+            // Permette la programmazione se la scadenza è futura
+            if (diffDays >= 0) {
+                // Calcoliamo il giorno prima
                 const triggerDate = new Date(task.date);
-                triggerDate.setHours(8, 0, 0, 0); // La sveglia suonerà alle 08:00 del giorno di scadenza
+                triggerDate.setDate(triggerDate.getDate() - 1); // Sottrae 1 giorno alla scadenza
+                triggerDate.setHours(8, 0, 0, 0); // Imposta l'orario alle 08:00 del mattino
 
                 navigator.serviceWorker.ready.then((registration) => {
                     if (registration.active) {
                         registration.active.postMessage({
                             action: 'scheduleNotification',
                             task: task,
-                            triggerAt: triggerDate.getTime()
+                            triggerAt: triggerDate.getTime() // Timestamp esatto del giorno prima alle 8:00
                         });
                     }
                 });
