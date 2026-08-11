@@ -1,18 +1,24 @@
-// Attivazione immediata del motore offline nativo
+/* ==========================================================================
+   1. REGISTRAZIONE ENGINE, DATABASE E NAVIGAZIONE SMARTPHONE
+   ========================================================================== */
+// Registrazione automatica accoppiata al Service Worker per l'offline e i push
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js?v=10.0')
-            .then(reg => console.log('Motore Offline Sincronizzato!', reg.scope))
+        navigator.serviceWorker.register('sw.js?v=12.0')
+            .then(reg => console.log('Motore Push Offline Sincronizzato!', reg.scope))
             .catch(err => console.log('Errore attivazione offline:', err));
     });
 }
 
-// Database locale persistente del browser
+// Database dei compiti salvato permanentemente nell'hard disk del browser
 let tasks = JSON.parse(localStorage.getItem('kanban-tasks')) || [];
+
+// Parametri globali per il tracciamento dei filtri di navigazione
 let currentSearchQuery = "";
 let currentFilterType = "all";
 let currentFilterPrio = "all";
-// Mappatura dei campi di input e dei pulsanti del modulo
+
+// Mappatura elementi DOM
 const taskIdInput = document.getElementById('task-id');
 const taskTitleInput = document.getElementById('task-title');
 const taskSubjectInput = document.getElementById('task-subject');
@@ -27,13 +33,13 @@ const toggleFilterPanelBtn = document.getElementById('toggle-filter-panel');
 const advancedFilterPanel = document.getElementById('advanced-filter-panel');
 const filterChips = document.querySelectorAll('.filter-chip');
 
-// Blocca la selezione di date passate nel calendario nativo
 if (taskDateInput) taskDateInput.min = new Date().toISOString().split("T")[0];
 
+// FUNZIONE SMARTPHONE: scambia la colonna attiva o apre il modulo di creazione
 function switchMobileView(target) {
-    if (window.innerWidth > 1024) return; // Disattivato su PC
+    if (window.innerWidth > 1024) return; // Disattivato se l'utente usa un computer
 
-    // BLOCCO DI SICUREZZA NEON: Se l'utente clicca su un input, impedisce di saltare a "In Coda"
+    // BLOCCO DI SICUREZZA: Se l'utente sta scrivendo in un input, non salta a "In Coda"
     if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT')) {
         return; 
     }
@@ -60,9 +66,8 @@ function switchMobileView(target) {
     window.scrollTo({ top: 0, behavior: 'instant' });
 }
 /* ==========================================================================
-   2. CENTRO FILTRI AVANZATO E ALGORITMO DI CALCOLO PRIORITÀ
+   2. TRACCIAMENTO FILTRI DINAMICI E CALCOLO SCADENZA CARD
    ========================================================================== */
-// Calcola i giorni mancanti alla scadenza e restituisce la fascia di urgenza
 function calculatePriority(dueDateStr) {
     const today = new Date(); today.setHours(0,0,0,0);
     const dueDate = new Date(dueDateStr); dueDate.setHours(0,0,0,0);
@@ -73,7 +78,6 @@ function calculatePriority(dueDateStr) {
     return { text: 'Tranquillo', class: 'tag-bassa' };
 }
 
-// Ascoltatore per la barra di ricerca testuale rapida
 if (searchInput) {
     searchInput.addEventListener('input', (e) => {
         currentSearchQuery = e.target.value.toLowerCase();
@@ -81,32 +85,28 @@ if (searchInput) {
     });
 }
 
-// Gestore per l'apertura e chiusura a cassetto del pannello filtri avanzati
 if (toggleFilterPanelBtn) {
     toggleFilterPanelBtn.addEventListener('click', () => {
         advancedFilterPanel.classList.toggle('hidden-panel');
     });
 }
 
-// Distribuisce l'ascolto dei tocchi su tutte le opzioni di filtro avanzato (Chips)
 filterChips.forEach(chip => {
     chip.addEventListener('click', () => {
-        // Categoria Filtro: Tipo di attività
         if (chip.hasAttribute('data-filter-type')) {
             document.querySelectorAll('[data-filter-type]').forEach(c => c.classList.remove('active'));
             currentFilterType = chip.getAttribute('data-filter-type');
         }
-        // Categoria Filtro: Grado di Urgenza
         if (chip.hasAttribute('data-filter-prio')) {
             document.querySelectorAll('[data-filter-prio]').forEach(c => c.classList.remove('active'));
             currentFilterPrio = chip.getAttribute('data-filter-prio');
         }
         chip.classList.add('active');
-        renderTasks(); // Aggiorna istantaneamente la vista
+        renderTasks();
     });
 });
 /* ==========================================================================
-   3. GESTIONE OPERATIVA FORM: CREAZIONE E MODIFICA COMPITI
+   3. MOTORE DI INSERIMENTO FORM, RESET MODULO E MODALITÀ MODIFICA
    ========================================================================== */
 if (submitBtn) {
     submitBtn.addEventListener('click', (e) => {
@@ -132,7 +132,7 @@ if (submitBtn) {
 
         localStorage.setItem('kanban-tasks', JSON.stringify(tasks));
         
-        // Nasconde la tastiera dello smartphone per evitare falsi click di navigazione
+        // Forza la chiusura della tastiera touch del telefono per ripulire l'area
         if (document.activeElement) {
             document.activeElement.blur();
         }
@@ -147,30 +147,26 @@ if (submitBtn) {
         cancelEditBtn.classList.add('hidden');
 
         if (window.innerWidth <= 1024) {
-            switchMobileView('todo');
+            switchMobileView('todo'); // Riporta istantaneamente alla prima colonna
         }
         checkImminentExams();
     });
 }
 
-// Estrae i dati di un compito specifico e li ricarica nel form per la modifica
 function startEdit(id) {
     const task = tasks.find(t => t.id === id);
     if (!task) return;
-    
     taskIdInput.value = task.id;
     taskTitleInput.value = task.title;
-    taskSubjectInput.value = task.subjectColor || "#a855f7";
+    taskSubjectInput.value = task.subjectColor || "#2563eb";
     taskTypeInput.value = task.type;
     taskDateInput.value = task.date;
-    
     formTitle.textContent = "Modifica Obiettivo";
     submitBtn.textContent = "Applica";
     cancelEditBtn.classList.remove('hidden');
-    switchMobileView('form'); // Apre il pannello su mobile per consentire la modifica
+    switchMobileView('form');
 }
 
-// Pulsante per annullare la modifica in corso e azzerare il modulo
 if (cancelEditBtn) {
     cancelEditBtn.addEventListener('click', () => {
         taskIdInput.value = "";
@@ -183,21 +179,19 @@ if (cancelEditBtn) {
     });
 }
 /* ==========================================================================
-   4. GENERATORE DELLE CARD HTML, AVANZAMENTO BARRA E NOTIFICHE RADAR
+   4. RENDERIZZATORE STRUTTURA CARD, PROGRESSO E PRENOTAZIONE SVEGLIE BACKGROUND
    ========================================================================== */
 function renderTasks() {
     const lists = { todo: document.getElementById('list-todo'), progress: document.getElementById('list-progress'), done: document.getElementById('list-done') };
     const counts = { todo: 0, progress: 0, done: 0 };
     if (!lists.todo) return;
 
-    // Svuota i vecchi nodi prima di iniettare i nuovi elementi aggiornati
     Object.keys(lists).forEach(status => { lists[status].innerHTML = ''; });
 
     tasks.forEach(task => {
         if (counts[task.status] !== undefined) counts[task.status]++;
         const priority = calculatePriority(task.date);
 
-        // Sistema di filtraggio incrociato combinato (Ricerca, Tipo e Urgenza)
         if (currentSearchQuery && !task.title.toLowerCase().includes(currentSearchQuery)) return;
         if (currentFilterType !== "all" && task.type !== currentFilterType) return;
         if (currentFilterPrio !== "all" && priority.text !== currentFilterPrio) return;
@@ -205,7 +199,7 @@ function renderTasks() {
         const card = document.createElement('div');
         card.className = 'task-card';
         card.id = task.id;
-        card.style.borderLeftColor = task.subjectColor || '#a855f7'; // Colore personalizzato materia
+        card.style.borderLeftColor = task.subjectColor || '#2563eb'; // Assegna il colore esatto richiesto
 
         const formattedDate = new Date(task.date).toLocaleDateString('it-IT');
         const typeLabel = task.type === 'verifica' ? 'Esame' : 'Studio';
@@ -224,13 +218,8 @@ function renderTasks() {
             </div>
         `;
 
-        // Associazione degli eventi d'ascolto per i pulsanti interni alla card
         card.querySelector('[data-action="edit"]').addEventListener('click', () => startEdit(task.id));
-        card.querySelector('[data-action="delete"]').addEventListener('click', () => { 
-            tasks = tasks.filter(t => t.id !== task.id); 
-            localStorage.setItem('kanban-tasks', JSON.stringify(tasks)); 
-            renderTasks(); 
-        });
+        card.querySelector('[data-action="delete"]').addEventListener('click', () => { tasks = tasks.filter(t => t.id !== task.id); localStorage.setItem('kanban-tasks', JSON.stringify(tasks)); renderTasks(); });
         if (task.status !== 'done') {
             card.querySelector('[data-action="move"]').addEventListener('click', () => {
                 if (task.status === 'todo') task.status = 'progress';
@@ -242,55 +231,50 @@ function renderTasks() {
         lists[task.status].appendChild(card);
     });
 
-    // Aggiorna i contatori numerici nelle intestazioni delle colonne
     document.getElementById('count-todo').textContent = counts.todo;
     document.getElementById('count-progress').textContent = counts.progress;
     document.getElementById('count-done').textContent = counts.done;
 
-    // Calcolo matematico percentuale avanzamento studio globale
     const total = counts.todo + counts.progress + counts.done;
     const progressPercent = total > 0 ? Math.round((counts.done / total) * 100) : 0;
     document.getElementById('global-progress-bar').style.width = `${progressPercent}%`;
     document.getElementById('global-progress-percent').textContent = `${progressPercent}%`;
 }
 
-// Gestione dei permessi per le notifiche push del browser
 if (notificationBtn) {
-    notificationBtn.addEventListener('click', () => { 
-        if ("Notification" in window) { 
-            Notification.requestPermission().then(p => { if (p === "granted") alert("Radar attivo e pronto!"); }); 
-        } 
-    });
+    notificationBtn.addEventListener('click', () => { if ("Notification" in window) { Notification.requestPermission().then(p => { if (p === "granted") alert("Radar attivo!"); }); } });
 }
 
-// Scansiona le scadenze attive per trovare esami imminenti (entro 2 giorni)
+// STRUTTURA RADAR SVEGLIE BACKGROUND: Invia sia i compiti che le verifiche ad app chiusa
 function checkImminentExams() {
+    if (!('serviceWorker' in navigator) || Notification.permission !== "granted") return;
+
     tasks.forEach(task => {
-        if (task.type === 'verifica' && task.status !== 'done') {
+        if (task.status !== 'done') { // Filtra solo i compiti attivi
             const today = new Date(); today.setHours(0,0,0,0);
-            const examDate = new Date(task.date); examDate.setHours(0,0,0,0);
-            const diffDays = Math.ceil((examDate - today) / (1000 * 60 * 60 * 24));
-            if (diffDays >= 0 && diffDays <= 2 && Notification.permission === "granted") {
-                new Notification("🚨 Emergenza Studio", { body: `Mancano ${diffDays} giorni all'esame di ${task.title}!` });
+            const taskDate = new Date(task.date); taskDate.setHours(0,0,0,0);
+            const diffDays = Math.ceil((taskDate - today) / (1000 * 60 * 60 * 24));
+
+            if (diffDays >= 0 && diffDays <= 2) {
+                const triggerDate = new Date(task.date);
+                triggerDate.setHours(8, 0, 0, 0); // La sveglia suonerà alle 08:00 del giorno di scadenza
+
+                navigator.serviceWorker.ready.then((registration) => {
+                    if (registration.active) {
+                        registration.active.postMessage({
+                            action: 'scheduleNotification',
+                            task: task,
+                            triggerAt: triggerDate.getTime()
+                        });
+                    }
+                });
             }
         }
     });
 }
 
-// Inizializzazione adattiva all'avvio in base alle dimensioni dello schermo dello smartphone
-window.addEventListener('resize', () => { 
-    if (window.innerWidth > 1024) { 
-        document.querySelectorAll('.mobile-column, .mobile-panel').forEach(el => { el.style.display = 'block'; }); 
-    } else { 
-        switchMobileView('todo'); 
-    } 
-});
+window.addEventListener('resize', () => { if (window.innerWidth > 1024) { document.querySelectorAll('.mobile-column, .mobile-panel').forEach(el => { el.style.display = 'block'; }); } else { switchMobileView('todo'); } });
+if (window.innerWidth <= 1024) { setTimeout(() => { switchMobileView('todo'); }, 50); } else { document.querySelectorAll('.mobile-column, .mobile-panel').forEach(el => { el.style.display = 'block'; }); }
 
-if (window.innerWidth <= 1024) { 
-    setTimeout(() => { switchMobileView('todo'); }, 50); 
-} else { 
-    document.querySelectorAll('.mobile-column, .mobile-panel').forEach(el => { el.style.display = 'block'; }); 
-}
-
-// Esecuzione del rendering iniziale dei dati salvati
 renderTasks();
+checkImminentExams();
