@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Studio Kanban OS - Ultimate Core</title>
-    <link rel="stylesheet" href="style.css?v=17.0">
-    <meta name="theme-color" content="#060913">
+    <title>Studio Kanban OS</title>
+    <link rel="stylesheet" href="style.css?v=26.0">
 </head>
 <body>
 
@@ -13,7 +12,7 @@
     <div class="neon-orb orb-cyan"></div>
 
     <div class="app-viewport">
-        <!-- Hub Avanzamento Globale -->
+        <!-- Progress Bar Globale -->
         <div class="dashboard-progress-hub">
             <div class="hub-meta">
                 <span class="hub-subtitle">PROGRESSO STUDIO</span>
@@ -24,23 +23,24 @@
             </div>
         </div>
 
+        <!-- Navbar Superiore -->
         <header class="main-navbar">
             <div class="brand">
-                <h1>Studio Kanban <span class="badge-neon">v17 CORE</span></h1>
-                <p>Dashboard adattiva touch-screen offline.</p>
+                <h1>Studio Kanban <span class="badge-neon">PRO ENGINE</span></h1>
+                <p>Dashboard offline adattiva per mobile e tablet.</p>
             </div>
             <div class="navbar-actions">
-                <button id="enable-notifications" class="btn-action-glass">Radar Notifiche</button>
+                <button id="btn-toggle-view" class="btn-action-glass" style="border-color: var(--neon-cyan); color: #22d3ee;">Vista Calendario 📅</button>
+                <button id="enable-notifications" class="btn-action-glass">Notifiche</button>
             </div>
         </header>
 
         <main class="workspace-grid">
-            <!-- Pannello di Controllo Sinistro -->
+            <!-- Pannello Laterale (Form e Stats) -->
             <aside class="sidebar-controls mobile-panel" id="panel-form">
                 
-                <!-- Pannello Statistiche e Gestione Condivisione -->
                 <div class="control-box stats-card" id="panel-stats">
-                    <h2>Analytics & Gestione</h2>
+                    <h2>Performance</h2>
                     <div class="stats-grid-local">
                         <div class="stat-item-box">
                             <span class="stat-num" id="stat-total-done">0</span>
@@ -51,27 +51,23 @@
                             <span class="stat-lbl">Streak</span>
                         </div>
                     </div>
-                    
-                    <!-- REVISIONATO: Pulsante unico di condivisione nativa -->
                     <div class="backup-actions-zone">
-                        <button id="btn-share-data" class="btn-neon-trigger" style="padding: 10px; font-size: 12px; background: linear-gradient(135deg, var(--neon-cyan), #3b82f6);">🔗 Condividi Compiti</button>
+                        <button id="btn-share-data" class="btn-neon-trigger" style="padding: 10px; font-size: 12px; background: linear-gradient(135deg, var(--neon-cyan), #3b82f6); width:100%;">🔗 Condividi Compiti</button>
                     </div>
-
                     <div class="subject-distribution-list" id="subject-stats-list"></div>
                 </div>
 
-                <!-- Form Creazione ed Aggiornamento Obiettivi -->
                 <div class="control-box form-card">
                     <div class="panel-header-mobile">
-                        <h2>Iniezione Obiettivo</h2>
+                        <h2 id="form-title">Nuovo Obiettivo</h2>
                         <button type="button" class="btn-close-panel" onclick="switchMobileView('todo')">✕</button>
                     </div>
-                    <form id="task-form" onsubmit="event.preventDefault(); return false;">
+                    <div id="task-form">
                         <input type="hidden" id="task-id">
                         
                         <div class="input-wrapper">
                             <label for="task-title">Nome Task o Argomento</label>
-                            <input type="text" id="task-title" required placeholder="Es: Esercizi o capitolo da studiare">
+                            <input type="text" id="task-title" placeholder="Es: Esercizi o capitolo da studiare">
                         </div>
                         
                         <div class="input-wrapper">
@@ -96,76 +92,64 @@
                         
                         <div class="input-wrapper">
                             <label for="task-date">Scadenza Tassativa</label>
-                            <input type="date" id="task-date" required>
+                            <input type="date" id="task-date">
                         </div>
                         
-                        <button type="submit" id="btn-submit-task" class="btn-neon-trigger">Inietta nel Sistema</button>
+                        <button type="button" id="btn-submit-task" class="btn-neon-trigger">Inietta nel Sistema</button>
                         <button type="button" id="cancel-edit-btn" class="btn-neon-abort hidden">Scollega Modifica</button>
-                    </form>
-                </div>
-
-                <!-- Centro Filtri Avanzato -->
-                <div class="control-box filter-card">
-                    <div class="filter-header-action">
-                        <h2>Filtro Navigazione</h2>
-                        <button id="toggle-filter-panel" class="btn-subtle-toggle">Avanzate 🛠️</button>
-                    </div>
-                    
-                    <input type="text" id="search-input" class="search-neon" placeholder="Cerca per parola chiave...">
-                    
-                    <div id="advanced-filter-panel" class="advanced-panel hidden-panel">
-                        <div class="filter-group-row">
-                            <label>Per Tipo:</label>
-                            <div class="filter-options">
-                                <button class="filter-chip active" data-filter-type="all">Tutti</button>
-                                <button class="filter-chip" data-filter-type="compito">Studio</button>
-                                <button class="filter-chip" data-filter-type="verifica">Verifiche</button>
-                            </div>
-                        </div>
-                        <div class="filter-group-row">
-                            <label>Per Priorità:</label>
-                            <div class="filter-options">
-                                <button class="filter-chip active" data-filter-prio="all">Tutte</button>
-                                <button class="filter-chip chip-high" data-filter-prio="Urgente">Urgente</button>
-                                <button class="filter-chip chip-low" data-filter-prio="Tranquillo">Tranquillo</button>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </aside>
 
-            <!-- Lavagna Kanban -->
-            <section class="kanban-deck">
-                <div class="deck-column mobile-column" id="col-todo">
-                    <div class="column-top">
-                        <div class="title-flow"><span class="neon-glow-dot dot-todo"></span><h2>In Coda</h2></div>
-                        <span class="badge-counter" id="count-todo">0</span>
+            <!-- Area Principale Destra -->
+            <div class="main-display-area">
+                
+                <!-- Calendario -->
+                <section class="calendar-view-container hidden-display">
+                    <div class="calendar-header-controls">
+                        <button id="btn-prev-month" class="btn-card">◀</button>
+                        <h2 id="calendar-month-title">Mese Anno</h2>
+                        <button id="btn-next-month" class="btn-card">▶</button>
                     </div>
-                    <div class="task-dropzone" id="list-todo"></div>
-                </div>
-
-                <div class="deck-column mobile-column" id="col-progress">
-                    <div class="column-top">
-                        <div class="title-flow"><span class="neon-glow-dot dot-progress"></span><h2>In Corso</h2></div>
-                        <span class="badge-counter" id="count-progress">0</span>
+                    <div class="calendar-weekdays-grid">
+                        <div>Lun</div><div>Mar</div><div>Mer</div><div>Gio</div><div>Ven</div><div>Sab</div><div>Dom</div>
                     </div>
-                    <div class="task-dropzone" id="list-progress"></div>
-                </div>
+                    <div id="calendar-days-grid" class="calendar-days-grid"></div>
+                </section>
 
-                <div class="deck-column mobile-column" id="col-done">
-                    <div class="column-top">
-                        <div class="title-flow"><span class="neon-glow-dot dot-done"></span><h2>Risolti</h2></div>
-                        <div class="done-header-actions">
-                            <button id="btn-clear-done" class="btn-clear-column-action" title="Svuota colonna">Svuota 🗑️</button>
-                            <span class="badge-counter" id="count-done">0</span>
+                <!-- Kanban Deck -->
+                <section class="kanban-deck" id="main-kanban-deck">
+                    <div class="deck-column mobile-column" id="col-todo">
+                        <div class="column-top">
+                            <div class="title-flow"><span class="neon-glow-dot dot-todo"></span><h2>In Coda</h2></div>
+                            <span class="badge-counter" id="count-todo">0</span>
                         </div>
+                        <div class="task-dropzone" id="list-todo"></div>
                     </div>
-                    <div class="task-dropzone" id="list-done"></div>
-                </div>
-            </section>
+
+                    <div class="deck-column mobile-column" id="col-progress">
+                        <div class="column-top">
+                            <div class="title-flow"><span class="neon-glow-dot dot-progress"></span><h2>In Corso</h2></div>
+                            <span class="badge-counter" id="count-progress">0</span>
+                        </div>
+                        <div class="task-dropzone" id="list-progress"></div>
+                    </div>
+
+                    <div class="deck-column mobile-column" id="col-done">
+                        <div class="column-top">
+                            <div class="title-flow"><span class="neon-glow-dot dot-done"></span><h2>Risolti</h2></div>
+                            <div class="done-header-actions">
+                                <button id="btn-clear-done" class="btn-clear-column-action">Svuota 🗑️</button>
+                                <span class="badge-counter" id="count-done">0</span>
+                            </div>
+                        </div>
+                        <div class="task-dropzone" id="list-done"></div>
+                    </div>
+                </section>
+            </div>
         </main>
 
-        <!-- Barra Inferiore Adattiva -->
+        <!-- Barra Inferiore Mobile -->
         <nav class="mobile-nav-bar">
             <button class="nav-item active" id="nav-todo" onclick="switchMobileView('todo')">
                 <span class="nav-icon">📋</span><span class="nav-label">In Coda</span>
@@ -182,6 +166,6 @@
         </nav>
     </div>
 
-    <script src="script.js?v=17.0"></script>
+    <script src="script.js?v=26.0"></script>
 </body>
 </html>
