@@ -1,4 +1,4 @@
-const CACHE_NAME = 'studio-kanban-v29-notification-engine';
+const CACHE_NAME = 'studio-kanban-v30-push-trigger';
 const ASSETS = [
   './',
   './index.html',
