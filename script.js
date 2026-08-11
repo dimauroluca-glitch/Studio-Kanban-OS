@@ -180,7 +180,7 @@ if (cancelEditBtn) {
     });
 }
 /* ==========================================================================
-   4. GENERATORE DELLE SCHEDE HTML, RADAR SVEGLIE E PULIZIA COLONNA RISOLTI
+   4. RENDERIZZATORE STRUTTURA CARD, RADAR SVEGLIE E CONTROLLO RESIZE SCHERMO
    ========================================================================== */
 function renderTasks() {
     const lists = { todo: document.getElementById('list-todo'), progress: document.getElementById('list-progress'), done: document.getElementById('list-done') };
@@ -211,9 +211,9 @@ function renderTasks() {
             <p class="task-card-title">${task.title}</p>
             <div class="task-card-date">📅 Scadenza: ${formattedDate}</div>
             <div class="task-actions">
-                <button class="btn-card" data-action="edit">Modifica</button>
-                ${task.status !== 'done' ? `<button class="btn-card" data-action="move">➔</button>` : ''}
-                <button class="btn-card btn-card-delete" data-action="delete">Rimuovi</button>
+                <button type="button" class="btn-card" data-action="edit">Modifica</button>
+                ${task.status !== 'done' ? `<button type="button" class="btn-card" data-action="move">➔</button>` : ''}
+                <button type="button" class="btn-card btn-card-delete" data-action="delete">Rimuovi</button>
             </div>
         `;
 
@@ -250,7 +250,7 @@ function renderTasks() {
     updateAnalyticsDashboard(counts);
 }
 
-// NUOVO: Svuota istantaneamente tutta la colonna dei compiti contrassegnati come Risolti
+// Svuota colonna Risolti
 document.getElementById('btn-clear-done').addEventListener('click', () => {
     const doneTasksCount = tasks.filter(t => t.status === 'done').length;
     if(doneTasksCount === 0) return;
@@ -293,8 +293,29 @@ filterChips.forEach(chip => {
 });
 if(notificationBtn) notificationBtn.addEventListener('click', () => { if ("Notification" in window) { Notification.requestPermission().then(p => { if (p === "granted") alert("Radar attivo!"); }); } });
 
-window.addEventListener('resize', () => { if (window.innerWidth > 1024) document.querySelectorAll('.mobile-column, .mobile-panel').forEach(el => { el.style.display = 'block'; }); else switchMobileView('todo'); });
-if (window.innerWidth <= 1024) setTimeout(() => { switchMobileView('todo'); }, 50); else document.querySelectorAll('.mobile-column, .mobile-panel').forEach(el => { el.style.display = 'block'; });
+
+// REVISIONATO: Memorizza la larghezza iniziale per bloccare i bug di resize causati dalla tastiera mobile
+let lastScreenWidth = window.innerWidth;
+
+window.addEventListener('resize', () => {
+    // Se la larghezza orizzontale non è cambiata, ignora l'evento (la tastiera ha solo ridotto l'altezza)
+    if (window.innerWidth === lastScreenWidth) return;
+    
+    lastScreenWidth = window.innerWidth; // Aggiorna il valore se l'utente ruota l'iPad
+
+    if (window.innerWidth > 1024) {
+        document.querySelectorAll('.mobile-column, .mobile-panel').forEach(el => { el.style.display = 'block'; });
+    } else {
+        switchMobileView('todo');
+    }
+});
+
+// Avvio adattivo iniziale controllato
+if (window.innerWidth <= 1024) {
+    setTimeout(() => { switchMobileView('todo'); }, 50);
+} else {
+    document.querySelectorAll('.mobile-column, .mobile-panel').forEach(el => { el.style.display = 'block'; });
+}
 
 renderTasks();
 checkImminentExams();
