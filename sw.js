@@ -1,4 +1,4 @@
-const CACHE_NAME = 'studio-kanban-v17-share-engine';
+const CACHE_NAME = 'studio-kanban-v18-keyboard-fix';
 const ASSETS = [
   './',
   './index.html',
