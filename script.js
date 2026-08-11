@@ -155,7 +155,7 @@ function buildCalendarGrid() {
     }
 }
 /* ==========================================================================
-   CORNICE 4: INIEZIONE ASINCRONA FORM, RESET DATI E CONDIVISIONE WEB SHARE
+   4. INIEZIONE ASINCRONA FORM, RESET DATI E CONDIVISIONE WEB SHARE
    ========================================================================== */
 // Gestore dell'azione del pulsante di inserimento
 if (submitBtn) {
@@ -172,8 +172,10 @@ if (submitBtn) {
         const type = taskTypeInput ? taskTypeInput.value : "compito";
 
         if (id) {
+            // Modalità Modifica: aggiorna il compito esistente
             tasks = tasks.map(t => t.id === id ? { ...t, title, subjectColor, type, date } : t);
         } else {
+            // Modalità Nuovo: inserisce una nuova scheda in coda
             tasks.push({ id: Date.now().toString(), title, subjectColor, type, date, status: 'todo' });
         }
 
@@ -192,6 +194,11 @@ if (submitBtn) {
 
         if (document.activeElement) document.activeElement.blur();
         if (window.innerWidth <= 1024) switchMobileView('todo');
+
+        // ==========================================================================
+        // 📍 POSIZIONE ESATTA: Mettilo qui, subito prima della chiusura del pulsante!
+        // ==========================================================================
+        checkImminentExams(); 
     });
 }
 
