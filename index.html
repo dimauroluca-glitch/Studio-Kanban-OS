@@ -1,18 +1,22 @@
+<!-- CORNICE 1: CONFIGURAZIONE INIZIALE, METADATI E DECORAZIONI NEON -->
 <!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Studio Kanban OS</title>
-    <link rel="stylesheet" href="style.css?v=26.0">
+    <title>Studio Kanban OS - Ultimate Core</title>
+    <!-- Parametro anti-cache v=29.0 obbligatorio per l'aggiornamento forzato su iPad -->
+    <link rel="stylesheet" href="style.css?v=29.0">
 </head>
 <body>
 
+    <!-- Sfondi sferici luminescenti ad anello gestiti dal CSS -->
     <div class="neon-orb orb-purple"></div>
     <div class="neon-orb orb-cyan"></div>
 
     <div class="app-viewport">
-        <!-- Progress Bar Globale -->
+        <!-- CORNICE 2: BARRA AVANZAMENTO SUPERIORE, INTERRUTTORI E COLONNA CONTROLLI -->
+        <!-- Hub Avanzamento Globale -->
         <div class="dashboard-progress-hub">
             <div class="hub-meta">
                 <span class="hub-subtitle">PROGRESSO STUDIO</span>
@@ -23,10 +27,10 @@
             </div>
         </div>
 
-        <!-- Navbar Superiore -->
+        <!-- Navbar Superiore Principale -->
         <header class="main-navbar">
             <div class="brand">
-                <h1>Studio Kanban <span class="badge-neon">PRO ENGINE</span></h1>
+                <h1>Studio Kanban <span class="badge-neon">PRO v29</span></h1>
                 <p>Dashboard offline adattiva per mobile e tablet.</p>
             </div>
             <div class="navbar-actions">
@@ -36,9 +40,10 @@
         </header>
 
         <main class="workspace-grid">
-            <!-- Pannello Laterale (Form e Stats) -->
+            <!-- Pannello di Controllo Sinistro (Form, Stats e Filtri) -->
             <aside class="sidebar-controls mobile-panel" id="panel-form">
                 
+                <!-- Box Performance Analytics e Condivisione Chat -->
                 <div class="control-box stats-card" id="panel-stats">
                     <h2>Performance</h2>
                     <div class="stats-grid-local">
@@ -57,6 +62,7 @@
                     <div class="subject-distribution-list" id="subject-stats-list"></div>
                 </div>
 
+                <!-- Form Modulo Inserimento Compiti (Privo di onsubmit per escludere crash) -->
                 <div class="control-box form-card">
                     <div class="panel-header-mobile">
                         <h2 id="form-title">Nuovo Obiettivo</h2>
@@ -100,11 +106,11 @@
                     </div>
                 </div>
             </aside>
-
-            <!-- Area Principale Destra -->
+            <!-- CORNICE 3: CONTENITORI DISPLAY (COLONNE/CALENDARIO) E CHIUSURA TAGS -->
+            <!-- Area Contenuti ad attivazione alternata o combinata -->
             <div class="main-display-area">
                 
-                <!-- Calendario -->
+                <!-- Struttura della Griglia del Calendario Mensile -->
                 <section class="calendar-view-container hidden-display">
                     <div class="calendar-header-controls">
                         <button id="btn-prev-month" class="btn-card">◀</button>
@@ -117,7 +123,7 @@
                     <div id="calendar-days-grid" class="calendar-days-grid"></div>
                 </section>
 
-                <!-- Kanban Deck -->
+                <!-- Tabellone Kanban Tradizionale a 3 Colonne -->
                 <section class="kanban-deck" id="main-kanban-deck">
                     <div class="deck-column mobile-column" id="col-todo">
                         <div class="column-top">
@@ -149,7 +155,7 @@
             </div>
         </main>
 
-        <!-- Barra Inferiore Mobile -->
+        <!-- Barra Inferiore Adattiva (Attiva esclusivamente su Smartphone e iPad in verticale) -->
         <nav class="mobile-nav-bar">
             <button class="nav-item active" id="nav-todo" onclick="switchMobileView('todo')">
                 <span class="nav-icon">📋</span><span class="nav-label">In Coda</span>
@@ -166,6 +172,7 @@
         </nav>
     </div>
 
-    <script src="script.js?v=26.0"></script>
+    <!-- Collegamento logico al codice script asincrono -->
+    <script src="script.js?v=29.0"></script>
 </body>
 </html>
