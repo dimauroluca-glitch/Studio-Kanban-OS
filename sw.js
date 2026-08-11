@@ -1,4 +1,4 @@
-const CACHE_NAME = 'studio-kanban-v12-push-engine';
+const CACHE_NAME = 'studio-kanban-v13-day-before';
 const ASSETS = [
   './',
   './index.html',
@@ -35,28 +35,26 @@ self.addEventListener('fetch', (e) => {
   );
 });
 
-// ASCOLTATORE SVEGLIA: Questo codice si attiva anche a telefono spento/app chiusa
+// ASCOLTATORE SVEGLIA: Si attiva alle 8:00 del giorno prima della scadenza
 self.addEventListener('message', (event) => {
   if (event.data && event.data.action === 'scheduleNotification') {
     const task = event.data.task;
-    
-    // Calcola quanti millisecondi mancano al momento della notifica
     const now = Date.now();
     const delay = event.data.triggerAt - now;
 
     if (delay > 0) {
-      // Imposta un timer in background controllato dal sistema operativo
+      // Imposta il timer programmato per il giorno prima
       setTimeout(() => {
-        self.registration.showNotification("🚨 Promemoria Studio!", {
-          body: `Scadenza imminente per: ${task.title}. Controlla il tuo planner!`,
-          tag: task.id, // Evita notifiche doppie per lo stesso compito
+        self.registration.showNotification("🚨 Scadenza Domani!", {
+          body: `Ricordati che domani scade il compito: ${task.title}.`,
+          tag: task.id,
           renotify: true
         });
       }, delay);
     } else {
-      // Se la data è oggi o passata, mostra immediatamente la notifica di sistema
+      // Se inserisci un compito quando il "giorno prima alle 8" è già passato
       self.registration.showNotification("🚨 Promemoria Studio!", {
-        body: `Oggi scade: ${task.title}. Mettiti al lavoro!`,
+        body: `Attenzione alla scadenza ravvicinata per: ${task.title}.`,
         tag: task.id,
         renotify: true
       });
