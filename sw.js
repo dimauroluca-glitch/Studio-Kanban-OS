@@ -1,4 +1,4 @@
-const CACHE_NAME = 'studio-kanban-v7-mobile';
+const CACHE_NAME = 'studio-kanban-v8-mobile';
 const ASSETS = [
   './',
   './index.html',
