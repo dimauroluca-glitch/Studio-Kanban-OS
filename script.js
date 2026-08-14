@@ -1,7 +1,5 @@
-/* ==========================================================================
-   CORNICE 1: CONFIGURAZIONE MOTORE OFFLINE, SICUREZZA E STATO INIZIALE
-   ========================================================================== */
-// Attivazione immediata del Service Worker per le notifiche programmabili
+
+
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js?v=29.0')
@@ -10,7 +8,7 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// PROTEZIONE DATABASE ANTI-CRASH: Pulisce la memoria da file corrotti o vecchi
+
 let tasks = [];
 try {
     tasks = JSON.parse(localStorage.getItem('kanban-tasks'));
@@ -29,7 +27,7 @@ let currentSearchQuery = "";
 let currentFilterType = "all";
 let currentFilterPrio = "all";
 
-// MAPPATURA NODI CORE DEL DOM
+
 const taskIdInput = document.getElementById('task-id');
 const taskTitleInput = document.getElementById('task-title');
 const taskSubjectInput = document.getElementById('task-subject');
@@ -49,16 +47,14 @@ const kanbanDeckContainer = document.getElementById('main-kanban-deck');
 const calendarMonthTitle = document.getElementById('calendar-month-title');
 const calendarDaysGrid = document.getElementById('calendar-days-grid');
 
-// Imposta la data minima selezionabile ad oggi nel calendario nativo
+
 if (taskDateInput) taskDateInput.min = new Date().toISOString().split("T")[0];
-/* ==========================================================================
-   CORNICE 2: INTERRUTTORI DI VISUALIZZAZIONE E NAVIGAZIONE ADATTIVA TOUCH
-   ========================================================================== */
-// FUNZIONE TOUCH: Sposta i moduli e le colonne su iPad e telefoni
+
+
 function switchMobileView(target) {
-    if (window.innerWidth > 1024) return; // Disattivato su computer fisso
+    if (window.innerWidth > 1024) return; 
     
-    // Sicurezza: blocca lo sbalzo se l'utente sta attivamente scrivendo in un campo
+    
     if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT')) {
         return; 
     }
@@ -88,7 +84,7 @@ function switchMobileView(target) {
     window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
-// SWITCH DI VISUALIZZAZIONE PRINCIPALE: Kanban VS Calendario Mensile
+
 if(btnToggleView) {
     btnToggleView.addEventListener('click', () => {
         if (currentDisplayMode === "kanban") {
@@ -106,10 +102,8 @@ if(btnToggleView) {
         }
     });
 }
-/* ==========================================================================
-   CORNICE 3: ENGINE CALENDARIO - COSTRUTTORE GEOMETRICO GRIGLIA MENSILE
-   ========================================================================== */
-// Controlli delle frecce mensili (Mese precedente / Mese successivo)
+
+
 const prevMonthBtn = document.getElementById('btn-prev-month');
 const nextMonthBtn = document.getElementById('btn-next-month');
 if(prevMonthBtn) prevMonthBtn.addEventListener('click', () => { calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() - 1); buildCalendarGrid(); });
@@ -127,11 +121,11 @@ function buildCalendarGrid() {
     const totalDays = new Date(year, month + 1, 0).getDate();
     const blankCells = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
 
-    // Generazione spazi vuoti di allineamento
+    
     for (let i = 0; i < blankCells; i++) {
         const emptyCell = document.createElement('div'); emptyCell.className = 'calendar-day-cell day-empty'; calendarDaysGrid.appendChild(emptyCell);
     }
-    // Generazione giorni effettivi
+    
     for (let day = 1; day <= totalDays; day++) {
         const dayCell = document.createElement('div'); dayCell.className = 'calendar-day-cell';
         const dayNumSpan = document.createElement('span'); dayNumSpan.className = 'calendar-day-number'; dayNumSpan.textContent = day; dayCell.appendChild(dayNumSpan);
@@ -140,7 +134,7 @@ function buildCalendarGrid() {
         const oggi = new Date();
         if (day === oggi.getDate() && month === oggi.getMonth() && year === oggi.getFullYear()) dayCell.classList.add('day-today');
 
-        // Sincronizzazione ed iniezione dei pallini colorati per i compiti in scadenza
+        
         const dayTasks = tasks.filter(t => t.date === currentCellDateStr && t.status !== 'done');
         if (dayTasks.length > 0) {
             const dotsContainer = document.createElement('div'); dotsContainer.className = 'calendar-events-dots-row';
@@ -154,10 +148,8 @@ function buildCalendarGrid() {
         calendarDaysGrid.appendChild(dayCell);
     }
 }
-/* ==========================================================================
-   4. INIEZIONE ASINCRONA FORM, RESET DATI E CONDIVISIONE WEB SHARE
-   ========================================================================== */
-// Gestore dell'azione del pulsante di inserimento
+
+
 if (submitBtn) {
     submitBtn.addEventListener('click', (e) => {
         if(e) e.preventDefault();
@@ -172,16 +164,16 @@ if (submitBtn) {
         const type = taskTypeInput ? taskTypeInput.value : "compito";
 
         if (id) {
-            // Modalità Modifica: aggiorna il compito esistente
+            
             tasks = tasks.map(t => t.id === id ? { ...t, title, subjectColor, type, date } : t);
         } else {
-            // Modalità Nuovo: inserisce una nuova scheda in coda
+            
             tasks.push({ id: Date.now().toString(), title, subjectColor, type, date, status: 'todo' });
         }
 
         localStorage.setItem('kanban-tasks', JSON.stringify(tasks));
         
-        // Svuotamento e reset completo del modulo form
+        
         if (taskIdInput) taskIdInput.value = ""; 
         if (taskTitleInput) taskTitleInput.value = ""; 
         if (taskDateInput) taskDateInput.value = "";
@@ -195,9 +187,9 @@ if (submitBtn) {
         if (document.activeElement) document.activeElement.blur();
         if (window.innerWidth <= 1024) switchMobileView('todo');
 
-        // ==========================================================================
-        // 📍 POSIZIONE ESATTA: Mettilo qui, subito prima della chiusura del pulsante!
-        // ==========================================================================
+        
+        
+        
         checkImminentExams(); 
     });
 }
@@ -227,7 +219,7 @@ if (cancelEditBtn) {
     });
 }
 
-// Condivisione Nativa di Sistema (WhatsApp, AirDrop, Telegram, Mail)
+
 const shareBtn = document.getElementById('btn-share-data');
 if(shareBtn) {
     shareBtn.addEventListener('click', async () => {
@@ -242,9 +234,7 @@ if(shareBtn) {
         else { try { await navigator.clipboard.writeText(riepilogoTesto); alert("Riepilogo copiato negli appunti!"); } catch (err) {} }
     });
 }
-/* ==========================================================================
-   CORNICE 5: GENERATORE GRAFICO DELLE CARD, STATISTICHE E BLOCCO RESIZE
-   ========================================================================== */
+
 function calculatePriority(dueDateStr) {
     const today = new Date(); today.setHours(0,0,0,0);
     const dueDate = new Date(dueDateStr); dueDate.setHours(0,0,0,0);
@@ -318,7 +308,7 @@ function renderTasks() {
     updateAnalyticsDashboard(counts);
 }
 
-// Svuotamento rapido dei completati
+
 const clearDoneBtn = document.getElementById('btn-clear-done');
 if(clearDoneBtn) {
     clearDoneBtn.addEventListener('click', () => {
@@ -387,7 +377,7 @@ filterChips.forEach(chip => {
     });
 });
 
-// MONITORAGGIO IPAD: Impedisce alla tastiera virtuale di cacciarti fuori dal modulo
+
 let lastScreenWidth = window.innerWidth;
 window.addEventListener('resize', () => {
     if (window.innerWidth === lastScreenWidth) return;
